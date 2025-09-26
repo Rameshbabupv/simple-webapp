@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { authService } from '../../services/keycloak';
 import UserList from '../users/UserList';
 import CreateUserForm from '../users/CreateUserForm';
+import EditUser from '../users/EditUser';
 import {
   isAdmin,
   canCreateUsers,
@@ -10,7 +11,7 @@ import {
 } from '../../utils/permissions';
 import { User } from '../../types/user';
 
-type ActiveView = 'overview' | 'users' | 'create-user' | 'profile' | 'groups';
+type ActiveView = 'overview' | 'users' | 'create-user' | 'edit-user' | 'profile' | 'groups';
 
 export const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>('overview');
@@ -38,7 +39,18 @@ export const Dashboard: React.FC = () => {
 
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
-    // Could open edit modal here in future
+    setActiveView('edit-user');
+  };
+
+  const handleUserUpdated = (updatedUser: User) => {
+    setSelectedUser(updatedUser);
+    setRefreshTrigger(prev => prev + 1);
+    setActiveView('users');
+  };
+
+  const handleCancelEdit = () => {
+    setSelectedUser(null);
+    setActiveView('users');
   };
 
   const renderOverview = () => (
@@ -261,6 +273,22 @@ export const Dashboard: React.FC = () => {
           <CreateUserForm
             onUserCreated={handleUserCreated}
             onCancel={() => setActiveView('users')}
+          />
+        );
+
+      case 'edit-user':
+        if (!selectedUser) {
+          return (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
+              No user selected for editing. Please select a user from the user list.
+            </div>
+          );
+        }
+        return (
+          <EditUser
+            user={selectedUser}
+            onUserUpdated={handleUserUpdated}
+            onCancel={handleCancelEdit}
           />
         );
 

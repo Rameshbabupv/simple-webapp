@@ -94,6 +94,14 @@ export class PermissionManager {
   }
 
   /**
+   * Check if current user can update users
+   * Per spec: platform-admins and app-admins can update users
+   */
+  canUpdateUsers(): boolean {
+    return this.can(PERMISSIONS.UPDATE_USERS);
+  }
+
+  /**
    * Check if current user has admin access (platform or app admin)
    */
   isAdmin(): boolean {
@@ -256,6 +264,7 @@ export const canCreateUsers = () => permissions.canCreateUsers();
 export const canManageGroups = () => permissions.canManageGroups();
 export const canViewUsers = () => permissions.canViewUsers();
 export const canDeleteUsers = () => permissions.canDeleteUsers();
+export const canUpdateUsers = () => permissions.canUpdateUsers();
 export const isAdmin = () => permissions.isAdmin();
 export const isPlatformAdmin = () => permissions.isPlatformAdmin();
 export const isAppAdmin = () => permissions.isAppAdmin();

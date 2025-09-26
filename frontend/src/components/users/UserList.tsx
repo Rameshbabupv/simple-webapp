@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { userService } from '../../services/userService';
 import { User } from '../../types/user';
-import { canViewUsers, canDeleteUsers, canCreateUsers } from '../../utils/permissions';
+import { canViewUsers, canCreateUsers, canUpdateUsers } from '../../utils/permissions';
 
 interface UserListProps {
   onUserSelect?: (user: User) => void;
@@ -21,7 +21,7 @@ export const UserList: React.FC<UserListProps> = ({
 
   // Check permissions
   const canView = canViewUsers();
-  const canDelete = canDeleteUsers();
+  const canUpdate = canUpdateUsers();
   const canCreate = canCreateUsers();
 
   useEffect(() => {
@@ -48,25 +48,26 @@ export const UserList: React.FC<UserListProps> = ({
     }
   };
 
-  const handleDeleteUser = async (userId: string, username: string) => {
-    if (!canDelete) {
-      alert('You do not have permission to delete users');
+  const handleToggleUserStatus = async (userId: string, username: string, currentStatus: boolean) => {
+    if (!canUpdate) {
+      alert('You do not have permission to modify users');
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+    const action = currentStatus ? 'deactivate' : 'activate';
+    if (!window.confirm(`Are you sure you want to ${action} user "${username}"?`)) {
       return;
     }
 
     try {
-      await userService.deleteUser(userId);
-      setUsers(users.filter(user => user.id !== userId));
-      if (selectedUserId === userId) {
-        setSelectedUserId(null);
-      }
+      await userService.updateUser(userId, { enabled: !currentStatus });
+      // Update the user in the local state
+      setUsers(users.map(user =>
+        user.id === userId ? { ...user, enabled: !currentStatus } : user
+      ));
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete user';
-      alert(`Error deleting user: ${errorMsg}`);
+      const errorMsg = err instanceof Error ? err.message : `Failed to ${action} user`;
+      alert(`Error ${action.slice(0, -1)}ing user: ${errorMsg}`);
     }
   };
 
@@ -378,24 +379,24 @@ export const UserList: React.FC<UserListProps> = ({
                   ✏️
                 </button>
 
-                {canDelete && (
+                {canUpdate && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteUser(user.id, user.username);
+                      handleToggleUserStatus(user.id, user.username, user.enabled);
                     }}
                     style={{
                       padding: '5px 8px',
-                      backgroundColor: '#dc3545',
+                      backgroundColor: user.enabled ? '#fd7e14' : '#28a745',
                       color: 'white',
                       border: 'none',
                       borderRadius: '3px',
                       cursor: 'pointer',
                       fontSize: '12px'
                     }}
-                    title="Delete User"
+                    title={user.enabled ? "Deactivate User" : "Activate User"}
                   >
-                    🗑️
+                    {user.enabled ? '⏸️' : '▶️'}
                   </button>
                 )}
               </div>
