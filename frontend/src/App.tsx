@@ -35,20 +35,90 @@ const AppContent: React.FC = () => {
       <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
         {/* Header */}
         <header style={{
-          backgroundColor: '#343a40',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
-          padding: '10px 20px',
+          padding: '16px 24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderBottom: '3px solid #007bff'
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <img src={logo} alt="logo" style={{ width: '40px', height: '40px' }} />
+          {/* Decorative background elements */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-20%',
+            width: '200px',
+            height: '200px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '50%',
+            filter: 'blur(40px)'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '-10%',
+            width: '150px',
+            height: '150px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: '50%',
+            filter: 'blur(30px)'
+          }} />
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            zIndex: 1
+          }}>
+            <div style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '52px',
+              height: '52px',
+              background: 'rgba(255, 255, 255, 0.15)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+            }}>
+              <img
+                src={logo}
+                alt="logo"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+                }}
+              />
+            </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: '20px' }}>Systech Nexus Platform</h1>
-              <p style={{ margin: 0, fontSize: '12px', color: '#adb5bd' }}>
-                User Management & Authentication
+              <h1 style={{
+                margin: 0,
+                fontSize: '24px',
+                fontWeight: '700',
+                background: 'linear-gradient(45deg, #ffffff, #e8f4f8)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                letterSpacing: '-0.5px'
+              }}>
+                Systech Nexus Platform
+              </h1>
+              <p style={{
+                margin: 0,
+                fontSize: '13px',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontWeight: '500',
+                letterSpacing: '0.3px'
+              }}>
+                🔐 User Management & Authentication
               </p>
             </div>
           </div>
@@ -57,37 +127,75 @@ const AppContent: React.FC = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '15px'
+            gap: '12px',
+            zIndex: 1
           }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                {user.firstName} {user.lastName}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '20px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}>
+              {/* User Avatar */}
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'linear-gradient(45deg, #4facfe, #00f2fe)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: '700',
+                color: 'white',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+              }}>
+                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
               </div>
-              <div style={{ fontSize: '12px', color: '#adb5bd' }}>
-                {user.email}
-              </div>
-              {user.groups && user.groups.length > 0 && (
-                <div style={{ fontSize: '11px', marginTop: '2px' }}>
-                  {user.groups.map(group => (
-                    <span
-                      key={group}
-                      style={{
-                        backgroundColor: group === 'platform-admins' ? '#dc3545' :
-                                         group === 'app-admins' ? '#fd7e14' : '#28a745',
-                        color: 'white',
-                        fontSize: '10px',
-                        padding: '1px 6px',
-                        borderRadius: '8px',
-                        marginRight: '4px'
-                      }}
-                    >
-                      {group}
-                    </span>
-                  ))}
+
+              {/* Compact User Info */}
+              <div style={{ minWidth: '0' }}>
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: '#ffffff',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '120px'
+                }}>
+                  {user.firstName} {user.lastName}
                 </div>
-              )}
+                {user.groups && user.groups.length > 0 && (
+                  <div style={{
+                    fontSize: '10px',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {user.groups[0] === 'platform-admins' ? '👑 Admin' :
+                     user.groups[0] === 'app-admins' ? '⚡ Admin' : '👤 User'}
+                  </div>
+                )}
+              </div>
             </div>
-            <LoginButton />
+
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '4px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+            }}>
+              <LoginButton />
+            </div>
           </div>
         </header>
 

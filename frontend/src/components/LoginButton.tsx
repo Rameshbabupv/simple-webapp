@@ -41,78 +41,38 @@ const LoginButton: React.FC<LoginButtonProps> = ({ className = '' }) => {
 
   if (isAuthenticated && user) {
     return (
-      <div className={`auth-section ${className}`}>
-        <div className="user-info">
-          <span className="welcome-text">
-            Welcome, <strong>{user.firstName} {user.lastName}</strong>
-          </span>
-          <span className="user-email">({user.email})</span>
-          <div className="user-groups">
-            Groups: {user.groups.join(', ') || 'None'}
-          </div>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="logout-button"
-        >
-          Logout
-        </button>
+      <button
+        onClick={handleLogout}
+        className={`logout-button ${className}`}
+      >
+        Logout
         <style>
           {`
-            .auth-section {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 12px;
-              padding: 20px;
-              background: rgba(255,255,255,0.1);
-              border-radius: 8px;
-              margin: 20px 0;
-            }
-
-            .user-info {
-              text-align: center;
-              color: #fff;
-            }
-
-            .welcome-text {
-              display: block;
-              font-size: 16px;
-              margin-bottom: 4px;
-            }
-
-            .user-email {
-              display: block;
-              font-size: 14px;
-              color: #ccc;
-              margin-bottom: 8px;
-            }
-
-            .user-groups {
-              font-size: 12px;
-              color: #aaa;
-              background: rgba(0,0,0,0.3);
-              padding: 4px 8px;
-              border-radius: 4px;
-            }
-
             .logout-button {
               background: #dc3545;
               color: white;
               border: none;
-              padding: 10px 20px;
-              border-radius: 5px;
+              padding: 8px 16px;
+              border-radius: 6px;
               cursor: pointer;
-              font-size: 14px;
-              transition: background 0.3s;
+              font-size: 13px;
+              font-weight: 600;
+              transition: all 0.2s ease;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
 
             .logout-button:hover {
               background: #c82333;
+              transform: translateY(-1px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            .logout-button:active {
+              transform: translateY(0);
             }
           `}
         </style>
-      </div>
+      </button>
     );
   }
 
