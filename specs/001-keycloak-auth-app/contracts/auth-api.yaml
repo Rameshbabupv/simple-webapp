@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: Keycloak Authentication API
+  version: 1.0.0
+  description: Authentication endpoints for Keycloak integration
+
+paths:
+  /auth/login:
+    post:
+      summary: Initiate login flow
+      description: Redirects to Keycloak login page or returns authentication URL
+      responses:
+        '200':
+          description: Login initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    description: Keycloak authentication URL
+                  sessionId:
+                    type: string
+                    description: Session identifier
+        '500':
+          description: Keycloak unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/callback:
+    post:
+      summary: Handle authentication callback
+      description: Process Keycloak authentication response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: Authorization code from Keycloak
+                state:
+                  type: string
+                  description: State parameter for CSRF protection
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      description: Invalidate session and redirect to Keycloak logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logoutUrl:
+                    type: string
+                    description: Keycloak logout URL
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Use refresh token to get new access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: Refresh token for token renewal
+        expiresIn:
+          type: integer
+          description: Token expiration time in seconds
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - user
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Keycloak user UUID
+        username:
+          type: string
+          description: Unique username
+        email:
+          type: string
+          format: email
+          description: User email address
+        firstName:
+          type: string
+          description: User first name
+        lastName:
+          type: string
+          description: User last name
+        groups:
+          type: array
+          items:
+            type: string
+          description: Group names user belongs to
+        enabled:
+          type: boolean
+          description: Whether user account is active
+      required:
+        - id
+        - username
+        - email
+        - groups
+        - enabled
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          description: Additional error details
+      required:
+        - error
+        - message
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
