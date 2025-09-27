@@ -1,50 +1,41 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: [TEMPLATE] → 1.0.0
+- Added sections: All principles and governance sections
+- Removed sections: None
+- Templates requiring updates: ⚠ pending - .specify/templates/*.md files
+- Follow-up TODOs: None
+-->
+
+# Simple React Keycloak Web App Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Component-First Architecture
+All UI functionality MUST be implemented as reusable React components. Components MUST be self-contained with clear props interfaces, independently testable, and follow single responsibility principle. No monolithic components exceeding 200 lines without explicit justification.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Authentication Security
+Keycloak integration MUST handle all authentication and authorization. No custom authentication logic permitted. All protected routes MUST verify authentication status. Token refresh and session management MUST be handled automatically through Keycloak client libraries.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Type Safety (NON-NEGOTIABLE)
+TypeScript MUST be used throughout the application. All components, props, API responses, and Keycloak user objects MUST have explicit type definitions. No `any` types permitted except for third-party library compatibility with explicit documentation.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. User & Group Management
+All user and group operations MUST go through Keycloak Admin API. Direct database manipulation of users/groups is prohibited. Role-based access control MUST be implemented using Keycloak roles and groups. User permissions MUST be validated on both client and server sides.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Testing & Documentation
+Unit tests MUST cover all custom React components and utilities. Integration tests MUST verify Keycloak authentication flows. API documentation MUST be maintained for all user/group management endpoints. Component props and usage MUST be documented with examples.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Security Requirements
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+All authentication tokens MUST be handled securely with httpOnly cookies where possible. No sensitive data MUST be stored in localStorage. All API calls MUST include proper authorization headers. CORS policies MUST be configured appropriately for Keycloak and application domains.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Code changes MUST pass TypeScript compilation, linting, and all tests before merge. Keycloak configuration changes MUST be documented and version controlled. Component library updates MUST maintain backward compatibility or include migration guides.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices. All pull requests MUST verify compliance with these principles. Breaking changes to authentication flows or user management require explicit approval and migration planning.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-09-26 | **Last Amended**: 2025-09-26
