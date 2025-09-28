@@ -3,20 +3,23 @@ import { authService } from '../../services/keycloak';
 import UserList from '../users/UserList';
 import CreateUserForm from '../users/CreateUserForm';
 import EditUser from '../users/EditUser';
+import CompanyMaster from '../companies/CompanyMaster';
 import {
   isAdmin,
   canCreateUsers,
   canViewUsers,
-  getUserRoleDisplayName
+  getUserRoleDisplayName,
+  isPlatformAdmin
 } from '../../utils/permissions';
 import { User } from '../../types/user';
 
-type ActiveView = 'overview' | 'users' | 'create-user' | 'edit-user' | 'profile' | 'groups';
+type ActiveView = 'overview' | 'users' | 'create-user' | 'edit-user' | 'profile' | 'groups' | 'company-master';
 
 export const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>('overview');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [masterEntryExpanded, setMasterEntryExpanded] = useState(false);
 
   // Get current user info
   const currentUser = authService.getUser();
@@ -306,6 +309,9 @@ export const Dashboard: React.FC = () => {
           </div>
         );
 
+      case 'company-master':
+        return <CompanyMaster />;
+
       default:
         return renderOverview();
     }
@@ -404,6 +410,54 @@ export const Dashboard: React.FC = () => {
               >
                 🏢 Groups
               </button>
+
+              {/* Master Entry Section - Platform Admins Only */}
+              {isPlatformAdmin() && (
+                <>
+                  <div style={{ margin: '10px 0' }}>
+                    <button
+                      onClick={() => setMasterEntryExpanded(!masterEntryExpanded)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        padding: '10px 15px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        color: '#495057',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        borderRadius: '4px'
+                      }}
+                    >
+                      <span>📊 Master-entry</span>
+                      <span style={{
+                        transform: masterEntryExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s ease'
+                      }}>
+                        ▶
+                      </span>
+                    </button>
+
+                    {masterEntryExpanded && (
+                      <div style={{ marginLeft: '20px', marginTop: '5px' }}>
+                        <button
+                          onClick={() => setActiveView('company-master')}
+                          style={{
+                            ...menuItemStyle(activeView === 'company-master'),
+                            fontSize: '13px',
+                            paddingLeft: '10px'
+                          }}
+                        >
+                          🏢 Company Master
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
         </nav>
