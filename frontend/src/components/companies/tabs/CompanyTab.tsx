@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Company } from '../../../services/companyService';
+import { Company, Country, companyService } from '../../../services/companyService';
 
 interface CompanyTabProps {
   company: Company | null;
@@ -13,6 +13,8 @@ interface CompanyFormData {
   companyCode: string;
   shortName: string;
   registeredAddress: string;
+  country: string;
+  countryId?: number;
 }
 
 const CompanyTab: React.FC<CompanyTabProps> = ({
@@ -25,9 +27,29 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     companyName: '',
     companyCode: '',
     shortName: '',
-    registeredAddress: ''
+    registeredAddress: '',
+    country: '',
+    countryId: undefined
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+
+  // Fetch countries on mount
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setLoadingCountries(true);
+      try {
+        const countriesList = await companyService.getAllCountries();
+        setCountries(countriesList);
+      } catch (error) {
+        console.error('Failed to fetch countries:', error);
+      } finally {
+        setLoadingCountries(false);
+      }
+    };
+    fetchCountries();
+  }, []);
 
   // Initialize form data only when company data changes, not when formData changes
   useEffect(() => {
@@ -36,7 +58,9 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
         companyName: company.companyName || '',
         companyCode: company.companyCode || '',
         shortName: company.shortName || '',
-        registeredAddress: company.registeredAddress || ''
+        registeredAddress: company.registeredAddress || '',
+        country: company.country || '',
+        countryId: undefined
       });
     }
   }, [company, isNewCompany]);
@@ -49,7 +73,9 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
         companyName: existingData.companyName || '',
         companyCode: existingData.companyCode || '',
         shortName: existingData.shortName || '',
-        registeredAddress: existingData.registeredAddress || ''
+        registeredAddress: existingData.registeredAddress || '',
+        country: existingData.country || '',
+        countryId: existingData.countryId
       });
     }
   }, [formData, isNewCompany]);
@@ -116,6 +142,23 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     if (error) {
       setValidationErrors(prev => ({ ...prev, registeredAddress: error }));
     }
+  };
+
+  const handleCountryChange = (value: string) => {
+    const selectedCountry = countries.find(c => c.id.toString() === value);
+    setLocalFormData(prev => ({
+      ...prev,
+      countryId: selectedCountry ? selectedCountry.id : undefined,
+      country: selectedCountry ? selectedCountry.name : ''
+    }));
+
+    // Notify parent component of changes
+    const updatedData = {
+      ...localFormData,
+      countryId: selectedCountry ? selectedCountry.id : undefined,
+      country: selectedCountry ? selectedCountry.name : ''
+    };
+    onDataChange(updatedData);
   };
 
 
@@ -240,21 +283,53 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
 
           {/* Right Column */}
           <div>
-            {/* Placeholder for future right column fields */}
-            <div style={{
-              padding: '20px',
-              backgroundColor: '#ffffff',
-              borderRadius: '6px',
-              border: '2px dashed #dee2e6',
-              textAlign: 'center',
-              color: '#6c757d',
-              fontSize: '14px'
-            }}>
-              <div style={{ marginBottom: '8px', fontSize: '24px' }}>📋</div>
-              <div>Right Column Fields</div>
-              <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                Additional fields will be added here
-              </div>
+            {/* Country Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Country
+              </label>
+              <select
+                value={localFormData.countryId?.toString() || ''}
+                onChange={(e) => handleCountryChange(e.target.value)}
+                disabled={loadingCountries}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: loadingCountries ? '#f8f9fa' : 'white',
+                  color: loadingCountries ? '#6c757d' : '#495057',
+                  cursor: loadingCountries ? 'wait' : 'pointer',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <option value="">
+                  {loadingCountries ? 'Loading countries...' : 'Select a country'}
+                </option>
+                {countries.map((country) => (
+                  <option key={country.id} value={country.id}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+              {company && localFormData.country && (
+                <div style={{
+                  fontSize: '12px',
+                  color: '#6c757d',
+                  marginTop: '4px'
+                }}>
+                  Current: {localFormData.country}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -276,7 +351,7 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
             <span>ℹ️</span>
             <span>
               Following STAGE approach: More company fields will be added incrementally.
-              Current fields: Company Name (required, 2-100 characters), Short Name (display only - backend update pending), Registered Address (optional, up to 500 characters). ID and Code shown as metadata.
+              Current fields: Company Name (required, 2-100 characters), Short Name (display only - backend update pending), Registered Address (optional, up to 500 characters), Country (optional). ID and Code shown as metadata.
             </span>
           </div>
         </div>
