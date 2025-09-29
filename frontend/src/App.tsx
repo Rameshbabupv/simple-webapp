@@ -3,8 +3,10 @@ import './App.css';
 import BuildInfo from './components/BuildInfo';
 import LoginButton from './components/LoginButton';
 import Dashboard from './components/dashboard/Dashboard';
+import CompanyEdit from './components/companies/CompanyEdit';
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -199,8 +201,12 @@ const AppContent: React.FC = () => {
           </div>
         </header>
 
-        {/* Main Dashboard */}
-        <Dashboard />
+        {/* Main Content */}
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/company/edit/:companyId" element={<CompanyEdit />} />
+          <Route path="/company-master" element={<Dashboard />} />
+        </Routes>
 
         {/* Footer */}
         <BuildInfo />
@@ -268,7 +274,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+        <AppContent />
+      </Router>
     </AuthProvider>
   );
 }

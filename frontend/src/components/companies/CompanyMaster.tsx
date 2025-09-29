@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   companyService,
   Company,
@@ -35,6 +36,7 @@ interface CompanyMasterProps {
 }
 
 const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -286,23 +288,8 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
     setSuccessMessage(null);
     setError(null);
     setActivateCompany(false); // Reset activation checkbox
-    setCurrentView('edit');
-
-    let availableCountries = countries;
-    if (!availableCountries.length) {
-      availableCountries = await loadCountries();
-    }
-
-    const normalizedCompanyCountry = company.country?.trim().toLowerCase();
-    if (normalizedCompanyCountry && availableCountries.length) {
-      const matchingCountry = availableCountries.find(country =>
-        country.name.trim().toLowerCase() === normalizedCompanyCountry
-      );
-
-      if (matchingCountry) {
-        setEditFormData(prev => ({ ...prev, countryId: matchingCountry.id }));
-      }
-    }
+    // Navigate to the new tabbed edit screen instead of modal
+    navigate(`/company/edit/${company.id}`);
   };
 
   const handleEditCancel = () => {

@@ -13,7 +13,9 @@ export interface Company {
   id: string;
   companyCode: string;
   companyName: string;
+  shortName?: string;
   primaryEmail?: string;
+  registeredAddress?: string;
   country: string;
   companyStatus: string;
   createdAt?: string;
@@ -30,8 +32,10 @@ export interface CreateCompanyInput {
 
 export interface UpdateCompanyInput {
   companyName?: string;
+  shortName?: string;
   registrationNumber?: string;
   primaryEmail?: string;
+  registeredAddress?: string;
 }
 
 // CRUD operation response types
@@ -39,7 +43,9 @@ export interface CompanyResponse {
   id: string;
   companyCode: string;
   companyName: string;
+  shortName?: string;
   primaryEmail?: string;
+  registeredAddress?: string;
   country?: string;
   companyStatus?: string;
   createdAt?: string;
@@ -159,6 +165,34 @@ export class CompanyService {
   }
 
   /**
+   * Get a specific company by ID
+   * Requires platform-admin or app-admin role
+   */
+  async getCompanyById(id: string): Promise<Company> {
+    const query = `
+      query GetCompanyById($id: ID!) {
+        company(id: $id) {
+          id
+          companyCode
+          companyName
+          primaryEmail
+          registeredAddress
+          country
+          companyStatus
+          createdAt
+          modifiedAt
+        }
+      }
+    `;
+
+    const response = await this.makeGraphQLRequest<{ company: Company }>(
+      query,
+      { id }
+    );
+    return response.company;
+  }
+
+  /**
    * Create a new company
    * Requires platform-admin or app-admin role
    */
@@ -170,6 +204,7 @@ export class CompanyService {
           companyCode
           companyName
           primaryEmail
+          registeredAddress
           country
           companyStatus
           createdAt
@@ -197,6 +232,7 @@ export class CompanyService {
           companyCode
           companyName
           primaryEmail
+          registeredAddress
           country
           companyStatus
           createdAt
