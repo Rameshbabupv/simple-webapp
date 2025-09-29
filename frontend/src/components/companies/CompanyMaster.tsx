@@ -22,7 +22,9 @@ interface CreateFormState {
 
 interface EditFormState {
   companyName?: string;
+  shortName?: string;
   registrationNumber?: string;
+  registeredAddress?: string;
   primaryEmail?: string;
   countryId?: number;
 }
@@ -287,7 +289,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
     setSelectedCompany(company);
     setEditFormData({
       companyName: company.companyName,
+      shortName: company.shortName || '',
       registrationNumber: company.companyCode, // Using companyCode as registration number
+      registeredAddress: company.registeredAddress || '',
       primaryEmail: company.primaryEmail || ''
     });
     setValidationErrors({});
@@ -333,7 +337,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       // Prepare data for submission (trim values)
       const dataToSubmit: UpdateCompanyInput = {
         companyName: editFormData.companyName?.trim(),
+        shortName: editFormData.shortName?.trim() || undefined,
         registrationNumber: editFormData.registrationNumber?.trim() || undefined,
+        registeredAddress: editFormData.registeredAddress?.trim() || undefined,
         primaryEmail: editFormData.primaryEmail?.trim() || undefined
       };
 
@@ -698,6 +704,58 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
                 {validationErrors.companyName}
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Short Name
+            </label>
+            <input
+              type="text"
+              value={editFormData.shortName || ''}
+              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, shortName: e.target.value }))}
+              placeholder="e.g., SYSTECH"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Registered Address
+            </label>
+            <textarea
+              value={editFormData.registeredAddress || ''}
+              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
+              onChange={(e) => setEditFormData(prev => ({ ...prev, registeredAddress: e.target.value }))}
+              rows={3}
+              placeholder="Enter registered address"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem',
+                fontFamily: 'inherit',
+                resize: 'vertical'
+              }}
+            />
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
