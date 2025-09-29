@@ -293,20 +293,11 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                 fontSize: '14px'
               }}>
                 Country
-                <span style={{
-                  fontWeight: '400',
-                  color: '#6c757d',
-                  fontSize: '12px',
-                  marginLeft: '8px',
-                  fontStyle: 'italic'
-                }}>
-                  (Display only - backend doesn't support country updates yet)
-                </span>
               </label>
               <select
                 value={localFormData.countryId?.toString() || ''}
                 onChange={(e) => handleCountryChange(e.target.value)}
-                disabled={true}
+                disabled={loadingCountries}
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -314,15 +305,15 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                   borderRadius: '6px',
                   fontSize: '14px',
                   fontFamily: 'inherit',
-                  backgroundColor: '#f8f9fa',
-                  color: '#6c757d',
-                  cursor: 'not-allowed',
+                  backgroundColor: loadingCountries ? '#f8f9fa' : 'white',
+                  color: loadingCountries ? '#6c757d' : '#495057',
+                  cursor: loadingCountries ? 'wait' : 'pointer',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
                 }}
               >
                 <option value="">
-                  {loadingCountries ? 'Loading countries...' : localFormData.country || 'No country set'}
+                  {loadingCountries ? 'Loading countries...' : 'Select a country'}
                 </option>
                 {countries.map((country) => (
                   <option key={country.id} value={country.id}>
@@ -360,7 +351,7 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
             <span>ℹ️</span>
             <span>
               Following STAGE approach: More company fields will be added incrementally.
-              Current fields: Company Name (required, 2-100 characters), Short Name (display only - backend update pending), Registered Address (optional, up to 500 characters), Country (display only - backend doesn't support updates yet). ID and Code shown as metadata.
+              Current fields: Company Name (required, 2-100 characters), Short Name (display only - backend update pending), Registered Address (optional, up to 500 characters), Country (optional - backend v1.1 supports updates). ID and Code shown as metadata.
             </span>
           </div>
         </div>
