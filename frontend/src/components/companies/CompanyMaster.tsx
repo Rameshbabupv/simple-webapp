@@ -22,7 +22,6 @@ interface CreateFormState {
 
 interface EditFormState {
   companyName?: string;
-  shortName?: string;
   registrationNumber?: string;
   registeredAddress?: string;
   primaryEmail?: string;
@@ -289,7 +288,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
     setSelectedCompany(company);
     setEditFormData({
       companyName: company.companyName,
-      shortName: company.shortName || '',
       registrationNumber: company.companyCode, // Using companyCode as registration number
       registeredAddress: company.registeredAddress || '',
       primaryEmail: company.primaryEmail || ''
@@ -337,7 +335,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       // Prepare data for submission (trim values)
       const dataToSubmit: UpdateCompanyInput = {
         companyName: editFormData.companyName?.trim(),
-        shortName: editFormData.shortName?.trim() || undefined,
         registrationNumber: editFormData.registrationNumber?.trim() || undefined,
         registeredAddress: editFormData.registeredAddress?.trim() || undefined,
         primaryEmail: editFormData.primaryEmail?.trim() || undefined
@@ -673,6 +670,39 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
               fontWeight: '600',
               color: '#333'
             }}>
+              Short Name
+            </label>
+            <input
+              type="text"
+              value={selectedCompany.shortName || 'N/A'}
+              disabled
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem',
+                backgroundColor: '#f8f9fa',
+                color: '#6c757d'
+              }}
+            />
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#6c757d',
+              marginTop: '0.25rem',
+              fontStyle: 'italic'
+            }}>
+              Display only - saving will be enabled when backend is updated
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
               Company Name *
             </label>
             <input
@@ -704,31 +734,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
                 {validationErrors.companyName}
               </div>
             )}
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Short Name
-            </label>
-            <input
-              type="text"
-              value={editFormData.shortName || ''}
-              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
-              onChange={(e) => setEditFormData(prev => ({ ...prev, shortName: e.target.value }))}
-              placeholder="e.g., SYSTECH"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem'
-              }}
-            />
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
