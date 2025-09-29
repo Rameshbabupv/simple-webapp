@@ -13,7 +13,9 @@ import { introspectCompanyDomain } from '../../utils/company-introspection';
 
 interface CreateFormState {
   companyName: string;
+  companyShortName: string;
   registrationNumber: string;
+  registeredAddress: string;
   countryId?: number;
   active: boolean;
 }
@@ -47,7 +49,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const [editFormData, setEditFormData] = useState<EditFormState>({});
   const [createFormData, setCreateFormData] = useState<CreateFormState>({
     companyName: '',
+    companyShortName: '',
     registrationNumber: '',
+    registeredAddress: '',
     countryId: undefined,
     active: true
   });
@@ -72,7 +76,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       setEditFormData({});
       setCreateFormData({
         companyName: '',
+        companyShortName: '',
         registrationNumber: '',
+        registeredAddress: '',
         countryId: undefined,
         active: true
       });
@@ -387,7 +393,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const handleCreateCancel = () => {
     setCreateFormData({
       companyName: '',
+      companyShortName: '',
       registrationNumber: '',
+      registeredAddress: '',
       countryId: undefined,
       active: true
     });
@@ -412,8 +420,10 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       // Prepare data for submission (trim values)
       const dataToSubmit: CreateCompanyInput = {
         companyName: createFormData.companyName.trim(),
+        companyShortName: createFormData.companyShortName.trim(),
         registrationNumber: createFormData.registrationNumber.trim(),
-        countryId: createFormData.countryId || undefined,
+        registeredAddress: createFormData.registeredAddress.trim(),
+        countryId: createFormData.countryId!,
         active: createFormData.active
       };
 
@@ -433,7 +443,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       setTimeout(() => {
         setCreateFormData({
           companyName: '',
+          companyShortName: '',
           registrationNumber: '',
+          registeredAddress: '',
           countryId: undefined,
           active: true
         });
@@ -885,6 +897,31 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
               fontWeight: '600',
               color: '#333'
             }}>
+              Company Short Name *
+            </label>
+            <input
+              type="text"
+              value={createFormData.companyShortName}
+              onChange={(e) => setCreateFormData(prev => ({ ...prev, companyShortName: e.target.value }))}
+              required
+              placeholder="e.g., SYSTECH"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
               Registration Number *
             </label>
             <input
@@ -915,6 +952,64 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
                 {validationErrors.registrationNumber}
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Registered Address *
+            </label>
+            <textarea
+              value={createFormData.registeredAddress}
+              onChange={(e) => setCreateFormData(prev => ({ ...prev, registeredAddress: e.target.value }))}
+              required
+              rows={3}
+              placeholder="Enter company registered address"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem',
+                fontFamily: 'inherit',
+                resize: 'vertical'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Country *
+            </label>
+            <select
+              value={createFormData.countryId || ''}
+              onChange={(e) => setCreateFormData(prev => ({ ...prev, countryId: e.target.value ? parseInt(e.target.value) : undefined }))}
+              required
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '1rem',
+                backgroundColor: 'white'
+              }}
+            >
+              <option value="">Select Country</option>
+              {countries.map(country => (
+                <option key={country.id} value={country.id}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>

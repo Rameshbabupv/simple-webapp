@@ -25,8 +25,10 @@ export interface Company {
 // CRUD operation input types
 export interface CreateCompanyInput {
   companyName: string;
+  companyShortName: string;
   registrationNumber: string;
-  countryId?: number;
+  registeredAddress: string;
+  countryId: number;
   active?: boolean;
 }
 
