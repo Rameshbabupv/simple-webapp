@@ -156,7 +156,7 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                     fontSize: '12px',
                     marginLeft: '8px'
                   }}>
-                    (ID: {company.id}, Code: {company.companyCode})
+                    (ID: {company.id}, Code: {company.companyCode}, Short Name: {company.shortName || 'N/A'})
                   </span>
                 )}
               </label>
@@ -188,59 +188,6 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                   gap: '4px'
                 }}>
                   ⚠️ {validationErrors.companyName}
-                </div>
-              )}
-            </div>
-
-            {/* Short Name Field */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '600',
-                color: '#495057',
-                fontSize: '14px'
-              }}>
-                Short Name
-                <span style={{
-                  fontWeight: '400',
-                  color: '#6c757d',
-                  fontSize: '12px',
-                  marginLeft: '8px',
-                  fontStyle: 'italic'
-                }}>
-                  (Display only - saving will be enabled when backend is updated)
-                </span>
-              </label>
-              <input
-                type="text"
-                value={localFormData.shortName || 'N/A'}
-                disabled
-                placeholder="Enter short name"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #dee2e6',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  backgroundColor: '#f8f9fa',
-                  color: '#6c757d',
-                  cursor: 'not-allowed',
-                  transition: 'border-color 0.2s ease',
-                  boxSizing: 'border-box'
-                }}
-              />
-              {validationErrors.shortName && (
-                <div style={{
-                  color: '#dc3545',
-                  fontSize: '12px',
-                  marginTop: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  ⚠️ {validationErrors.shortName}
                 </div>
               )}
             </div>
