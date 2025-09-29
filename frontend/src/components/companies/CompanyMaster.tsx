@@ -20,15 +20,21 @@ interface CreateFormState {
 interface EditFormState {
   companyName?: string;
   registrationNumber?: string;
+  primaryEmail?: string;
   countryId?: number;
 }
 
 interface ValidationErrors {
   companyName?: string;
   registrationNumber?: string;
+  primaryEmail?: string;
 }
 
-const CompanyMaster: React.FC = () => {
+interface CompanyMasterProps {
+  resetKey?: number;
+}
+
+const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +55,31 @@ const CompanyMaster: React.FC = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
+  const [activateCompany, setActivateCompany] = useState(false);
 
   useEffect(() => {
     checkServiceAndLoadCompanies();
   }, []);
+
+  // Reset internal state when resetKey changes (triggered from parent navigation)
+  useEffect(() => {
+    if (resetKey !== undefined) {
+      console.log(`🔄 CompanyMaster: resetKey changed to ${resetKey}, resetting to list view`);
+      setCurrentView('list');
+      setSelectedCompany(null);
+      setEditFormData({});
+      setCreateFormData({
+        companyName: '',
+        registrationNumber: '',
+        countryId: undefined,
+        active: true
+      });
+      setValidationErrors({});
+      setSuccessMessage(null);
+      setError(null);
+      setActivateCompany(false);
+    }
+  }, [resetKey]);
 
   const checkServiceAndLoadCompanies = async () => {
     try {
@@ -232,6 +259,14 @@ const CompanyMaster: React.FC = () => {
       errors.registrationNumber = 'Registration Number must be less than 50 characters';
     }
 
+    // Email validation (optional but must be valid if provided)
+    if (editFormData.primaryEmail && editFormData.primaryEmail.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editFormData.primaryEmail.trim())) {
+        errors.primaryEmail = 'Please enter a valid email address';
+      }
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -241,11 +276,13 @@ const CompanyMaster: React.FC = () => {
     setSelectedCompany(company);
     setEditFormData({
       companyName: company.companyName,
-      registrationNumber: company.companyCode // Using companyCode as registration number
+      registrationNumber: company.companyCode, // Using companyCode as registration number
+      primaryEmail: company.primaryEmail || ''
     });
     setValidationErrors({});
     setSuccessMessage(null);
     setError(null);
+    setActivateCompany(false); // Reset activation checkbox
     setCurrentView('edit');
 
     let availableCountries = countries;
@@ -270,6 +307,7 @@ const CompanyMaster: React.FC = () => {
     setEditFormData({});
     setValidationErrors({});
     setSuccessMessage(null);
+    setActivateCompany(false);
     setCurrentView('list');
   };
 
@@ -288,10 +326,19 @@ const CompanyMaster: React.FC = () => {
     try {
       setEditLoading(true);
 
+      // First, activate the company if the checkbox is checked
+      if (activateCompany && selectedCompany.companyStatus !== 'ACTIVE') {
+        console.log('Activating company first...');
+        await companyService.reactivateCompany(selectedCompany.id);
+        // Update local state to reflect activation
+        setSelectedCompany(prev => prev ? { ...prev, companyStatus: 'ACTIVE' } : null);
+      }
+
       // Prepare data for submission (trim values)
       const dataToSubmit: UpdateCompanyInput = {
         companyName: editFormData.companyName?.trim(),
-        registrationNumber: editFormData.registrationNumber?.trim() || undefined
+        registrationNumber: editFormData.registrationNumber?.trim() || undefined,
+        primaryEmail: editFormData.primaryEmail?.trim() || undefined
       };
 
       const updatedCompany = await companyService.updateCompany(selectedCompany.id, dataToSubmit);
@@ -303,6 +350,7 @@ const CompanyMaster: React.FC = () => {
               ...c,
               companyName: updatedCompany.companyName,
               companyCode: updatedCompany.companyCode || c.companyCode,
+              primaryEmail: updatedCompany.primaryEmail || c.primaryEmail,
               country: updatedCompany.country || c.country,
               companyStatus: updatedCompany.companyStatus || c.companyStatus,
               modifiedAt: updatedCompany.modifiedAt
@@ -610,6 +658,86 @@ const CompanyMaster: React.FC = () => {
             />
           </div>
 
+          {/* Status Field - Top Priority */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Status
+            </label>
+            <div style={{
+              width: '100%',
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '1rem',
+              backgroundColor: (selectedCompany.companyStatus === 'ACTIVE' || activateCompany) ? '#d4edda' : '#f8d7da',
+              color: (selectedCompany.companyStatus === 'ACTIVE' || activateCompany) ? '#155724' : '#721c24',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '500'
+            }}>
+              {selectedCompany.companyStatus === 'ACTIVE' ? (
+                <>
+                  <span style={{ fontSize: '1.2rem', color: '#28a745' }}>✓</span>
+                  ACTIVE
+                </>
+              ) : activateCompany ? (
+                <>
+                  <span style={{ fontSize: '1.2rem', color: '#28a745' }}>✓</span>
+                  WILL BE ACTIVATED
+                </>
+              ) : (
+                selectedCompany.companyStatus
+              )}
+            </div>
+            {selectedCompany.companyStatus !== 'ACTIVE' && (
+              <>
+                <div style={{
+                  color: '#dc3545',
+                  fontSize: '0.9rem',
+                  marginTop: '0.5rem',
+                  fontStyle: 'italic'
+                }}>
+                  ⚠️ Company must be ACTIVE to edit details
+                </div>
+                <div style={{
+                  marginTop: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="activate-company"
+                    checked={activateCompany}
+                    onChange={(e) => setActivateCompany(e.target.checked)}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <label
+                    htmlFor="activate-company"
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      color: '#28a745',
+                      fontWeight: '500'
+                    }}
+                  >
+                    ✓ Activate this company and allow editing
+                  </label>
+                </div>
+              </>
+            )}
+          </div>
+
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{
               display: 'block',
@@ -622,6 +750,7 @@ const CompanyMaster: React.FC = () => {
             <input
               type="text"
               value={editFormData.companyName || ''}
+              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
               onChange={(e) => {
                 setEditFormData(prev => ({ ...prev, companyName: e.target.value }));
                 // Clear validation error when user starts typing
@@ -661,6 +790,7 @@ const CompanyMaster: React.FC = () => {
             <input
               type="text"
               value={editFormData.registrationNumber || ''}
+              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
               onChange={(e) => {
                 setEditFormData(prev => ({ ...prev, registrationNumber: e.target.value }));
                 // Clear validation error when user starts typing
@@ -698,18 +828,33 @@ const CompanyMaster: React.FC = () => {
             </label>
             <input
               type="email"
-              value={selectedCompany.primaryEmail || ''}
-              disabled
+              value={editFormData.primaryEmail || ''}
+              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
+              onChange={(e) => {
+                setEditFormData(prev => ({ ...prev, primaryEmail: e.target.value }));
+                // Clear validation error when user starts typing
+                if (validationErrors.primaryEmail) {
+                  setValidationErrors(prev => ({ ...prev, primaryEmail: '' }));
+                }
+              }}
+              placeholder="Enter primary email address"
               style={{
                 width: '100%',
                 padding: '0.75rem',
-                border: '1px solid #ddd',
+                border: validationErrors.primaryEmail ? '2px solid #dc3545' : '1px solid #ddd',
                 borderRadius: '4px',
-                fontSize: '1rem',
-                backgroundColor: '#f8f9fa',
-                color: '#6c757d'
+                fontSize: '1rem'
               }}
             />
+            {validationErrors.primaryEmail && (
+              <div style={{
+                color: '#dc3545',
+                fontSize: '0.8rem',
+                marginTop: '0.25rem'
+              }}>
+                {validationErrors.primaryEmail}
+              </div>
+            )}
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
@@ -764,30 +909,6 @@ const CompanyMaster: React.FC = () => {
             )}
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Status
-            </label>
-            <input
-              type="text"
-              value={selectedCompany.companyStatus}
-              disabled
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                backgroundColor: '#f8f9fa',
-                color: '#6c757d'
-              }}
-            />
-          </div>
 
           <div style={{
             display: 'flex',
@@ -798,21 +919,21 @@ const CompanyMaster: React.FC = () => {
           }}>
             <button
               type="submit"
-              disabled={editLoading}
+              disabled={editLoading || (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany)}
               style={{
                 flex: 1,
                 padding: '0.75rem 1.5rem',
-                backgroundColor: '#28a745',
+                backgroundColor: (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany) ? '#6c757d' : '#28a745',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: editLoading ? 'not-allowed' : 'pointer',
+                cursor: (editLoading || (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany)) ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
                 fontWeight: '600',
-                opacity: editLoading ? 0.6 : 1
+                opacity: (editLoading || (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany)) ? 0.6 : 1
               }}
             >
-              {editLoading ? 'Updating...' : 'Update Company'}
+              {editLoading ? 'Updating...' : (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany) ? 'Company Not Active' : activateCompany ? 'Update & Activate Company' : 'Update Company'}
             </button>
             <button
               type="button"
@@ -1315,9 +1436,20 @@ const CompanyMaster: React.FC = () => {
                       fontSize: '0.8rem',
                       fontWeight: '500',
                       backgroundColor: company.companyStatus === 'ACTIVE' ? '#d4edda' : '#f8d7da',
-                      color: company.companyStatus === 'ACTIVE' ? '#155724' : '#721c24'
+                      color: company.companyStatus === 'ACTIVE' ? '#155724' : '#721c24',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
                     }}>
-                      {company.companyStatus}
+                      {company.companyStatus === 'ACTIVE' ? (
+                        <>
+                          <span style={{ fontSize: '1rem' }}>✓</span>
+                          ACTIVE
+                        </>
+                      ) : (
+                        company.companyStatus
+                      )}
                     </span>
                   </td>
                   <td style={{ padding: '12px', textAlign: 'center' }}>

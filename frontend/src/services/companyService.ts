@@ -31,6 +31,7 @@ export interface CreateCompanyInput {
 export interface UpdateCompanyInput {
   companyName?: string;
   registrationNumber?: string;
+  primaryEmail?: string;
 }
 
 // CRUD operation response types
