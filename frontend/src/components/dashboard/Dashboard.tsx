@@ -20,6 +20,7 @@ export const Dashboard: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [masterEntryExpanded, setMasterEntryExpanded] = useState(false);
+  const [companyMasterKey, setCompanyMasterKey] = useState(0);
 
   // Get current user info
   const currentUser = authService.getUser();
@@ -33,6 +34,13 @@ export const Dashboard: React.FC = () => {
       setActiveView('profile');
     }
   }, []);
+
+  // Force CompanyMaster to remount when navigating to it
+  useEffect(() => {
+    if (activeView === 'company-master') {
+      setCompanyMasterKey(prev => prev + 1);
+    }
+  }, [activeView]);
 
   const handleUserCreated = (userId: string) => {
     console.log('User created with ID:', userId);
@@ -310,7 +318,7 @@ export const Dashboard: React.FC = () => {
         );
 
       case 'company-master':
-        return <CompanyMaster />;
+        return <CompanyMaster key={`company-master-${companyMasterKey}`} resetKey={companyMasterKey} />;
 
       default:
         return renderOverview();
@@ -444,7 +452,10 @@ export const Dashboard: React.FC = () => {
                     {masterEntryExpanded && (
                       <div style={{ marginLeft: '20px', marginTop: '5px' }}>
                         <button
-                          onClick={() => setActiveView('company-master')}
+                          onClick={() => {
+                            setActiveView('company-master');
+                            setCompanyMasterKey(prev => prev + 1);
+                          }}
                           style={{
                             ...menuItemStyle(activeView === 'company-master'),
                             fontSize: '13px',
