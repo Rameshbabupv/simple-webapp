@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   companyService,
   Company,
@@ -41,7 +41,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const [serviceAvailable, setServiceAvailable] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [countries, setCountries] = useState<Country[]>([]);
-  const [countriesLoading, setCountriesLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [editFormData, setEditFormData] = useState<EditFormState>({});
   const [createFormData, setCreateFormData] = useState<CreateFormState>({
@@ -56,6 +55,7 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const [createLoading, setCreateLoading] = useState(false);
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
   const [activateCompany, setActivateCompany] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     checkServiceAndLoadCompanies();
@@ -78,8 +78,18 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       setSuccessMessage(null);
       setError(null);
       setActivateCompany(false);
+      setSearchQuery('');
     }
   }, [resetKey]);
+
+  // Filter companies based on search query
+  const filteredCompanies = useMemo(() => {
+    return searchQuery.trim()
+      ? companies.filter(company =>
+          company.companyName.toLowerCase().includes(searchQuery.toLowerCase().trim())
+        )
+      : companies;
+  }, [companies, searchQuery]);
 
   const checkServiceAndLoadCompanies = async () => {
     try {
@@ -133,7 +143,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
 
   // Load countries for dropdown
   const loadCountries = async (): Promise<Country[]> => {
-    setCountriesLoading(true);
     try {
       const countryList = await companyService.getAllCountries();
       setCountries(countryList);
@@ -144,8 +153,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       setError('Failed to load countries from database. Use 🌍 Test Countries button to check available queries.');
       setCountries([]); // Empty array, no fallback
       return [];
-    } finally {
-      setCountriesLoading(false);
     }
   };
 
@@ -188,7 +195,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
   const handleTestCountries = async () => {
     try {
       console.log('🌍 Starting Enhanced Countries Backend Discovery...');
-      setCountriesLoading(true);
       setError(null);
 
       // Use our enhanced direct backend test
@@ -214,11 +220,8 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
       setTimeout(() => {
         setError(null);
       }, 8000);
-    } finally {
-      setCountriesLoading(false);
     }
   };
-
 
   // Form validation helper for create
   const validateCreateForm = (): boolean => {
@@ -658,86 +661,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
             />
           </div>
 
-          {/* Status Field - Top Priority */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Status
-            </label>
-            <div style={{
-              width: '100%',
-              padding: '0.75rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              backgroundColor: (selectedCompany.companyStatus === 'ACTIVE' || activateCompany) ? '#d4edda' : '#f8d7da',
-              color: (selectedCompany.companyStatus === 'ACTIVE' || activateCompany) ? '#155724' : '#721c24',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontWeight: '500'
-            }}>
-              {selectedCompany.companyStatus === 'ACTIVE' ? (
-                <>
-                  <span style={{ fontSize: '1.2rem', color: '#28a745' }}>✓</span>
-                  ACTIVE
-                </>
-              ) : activateCompany ? (
-                <>
-                  <span style={{ fontSize: '1.2rem', color: '#28a745' }}>✓</span>
-                  WILL BE ACTIVATED
-                </>
-              ) : (
-                selectedCompany.companyStatus
-              )}
-            </div>
-            {selectedCompany.companyStatus !== 'ACTIVE' && (
-              <>
-                <div style={{
-                  color: '#dc3545',
-                  fontSize: '0.9rem',
-                  marginTop: '0.5rem',
-                  fontStyle: 'italic'
-                }}>
-                  ⚠️ Company must be ACTIVE to edit details
-                </div>
-                <div style={{
-                  marginTop: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <input
-                    type="checkbox"
-                    id="activate-company"
-                    checked={activateCompany}
-                    onChange={(e) => setActivateCompany(e.target.checked)}
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <label
-                    htmlFor="activate-company"
-                    style={{
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: '#28a745',
-                      fontWeight: '500'
-                    }}
-                  >
-                    ✓ Activate this company and allow editing
-                  </label>
-                </div>
-              </>
-            )}
-          </div>
-
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{
               display: 'block',
@@ -785,45 +708,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
               fontWeight: '600',
               color: '#333'
             }}>
-              Registration Number
-            </label>
-            <input
-              type="text"
-              value={editFormData.registrationNumber || ''}
-              disabled={selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany}
-              onChange={(e) => {
-                setEditFormData(prev => ({ ...prev, registrationNumber: e.target.value }));
-                // Clear validation error when user starts typing
-                if (validationErrors.registrationNumber) {
-                  setValidationErrors(prev => ({ ...prev, registrationNumber: '' }));
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: validationErrors.registrationNumber ? '2px solid #dc3545' : '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem'
-              }}
-            />
-            {validationErrors.registrationNumber && (
-              <div style={{
-                color: '#dc3545',
-                fontSize: '0.8rem',
-                marginTop: '0.25rem'
-              }}>
-                {validationErrors.registrationNumber}
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
               Primary Email
             </label>
             <input
@@ -857,59 +741,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
             )}
           </div>
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Country
-            </label>
-            <select
-              value={editFormData.countryId ? String(editFormData.countryId) : ''}
-              onChange={(e) => setEditFormData(prev => ({
-                ...prev,
-                countryId: e.target.value ? Number.parseInt(e.target.value, 10) : undefined
-              }))}
-              disabled={countriesLoading || countries.length === 0}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                backgroundColor: countriesLoading ? '#f8f9fa' : 'white'
-              }}
-            >
-              <option value="">Select a country</option>
-              {countries.map(country => (
-                <option key={country.id} value={country.id}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            {(!countriesLoading && countries.length === 0) && (
-              <div style={{
-                color: '#6c757d',
-                fontSize: '0.8rem',
-                marginTop: '0.25rem'
-              }}>
-                No countries available. Use the 🌍 Test Countries button to discover options.
-              </div>
-            )}
-            {selectedCompany.country && (
-              <div style={{
-                color: '#6c757d',
-                fontSize: '0.75rem',
-                marginTop: '0.25rem'
-              }}>
-                Current value: {selectedCompany.country}
-              </div>
-            )}
-          </div>
-
-
           <div style={{
             display: 'flex',
             gap: '1rem',
@@ -933,7 +764,7 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
                 opacity: (editLoading || (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany)) ? 0.6 : 1
               }}
             >
-              {editLoading ? 'Updating...' : (selectedCompany.companyStatus !== 'ACTIVE' && !activateCompany) ? 'Company Not Active' : activateCompany ? 'Update & Activate Company' : 'Update Company'}
+              {editLoading ? 'Updating...' : 'Update Company'}
             </button>
             <button
               type="button"
@@ -1101,49 +932,6 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{
-              display: 'block',
-              marginBottom: '0.5rem',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Country
-            </label>
-            <select
-              value={createFormData.countryId || ''}
-              onChange={(e) => setCreateFormData(prev => ({
-                ...prev,
-                countryId: e.target.value ? parseInt(e.target.value) : undefined
-              }))}
-              disabled={countriesLoading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                backgroundColor: countriesLoading ? '#f8f9fa' : 'white'
-              }}
-            >
-              <option value="">Select a country (optional)</option>
-              {countries.map(country => (
-                <option key={country.id} value={country.id}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            {countriesLoading && (
-              <div style={{
-                color: '#6c757d',
-                fontSize: '0.8rem',
-                marginTop: '0.25rem'
-              }}>
-                Loading countries...
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
               display: 'flex',
               alignItems: 'center',
               fontWeight: '600',
@@ -1220,6 +1008,7 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
     );
   }
 
+  // List View (Main View)
   return (
     <div style={{ padding: '1rem' }}>
       <div style={{
@@ -1323,9 +1112,67 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
         </div>
       )}
 
-      {companies.length === 0 ? (
+      {/* Search Input */}
+      <div style={{
+        marginBottom: '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem'
+      }}>
+        <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+          <input
+            type="text"
+            placeholder="🔍 Search by Company Name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              fontSize: '0.9rem',
+              backgroundColor: '#ffffff',
+              outline: 'none',
+              transition: 'border-color 0.2s ease'
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                color: '#6c757d',
+                padding: '2px'
+              }}
+              title="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <div style={{
+            fontSize: '0.85rem',
+            color: '#6c757d',
+            fontStyle: 'italic'
+          }}>
+            Searching: "{searchQuery}"
+          </div>
+        )}
+      </div>
+
+      {filteredCompanies.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <p style={{ color: '#666' }}>No companies found.</p>
+          <p style={{ color: '#666' }}>
+            {searchQuery ? `No companies found matching "${searchQuery}"` : 'No companies found.'}
+          </p>
         </div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
@@ -1391,7 +1238,7 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
               </tr>
             </thead>
             <tbody>
-              {companies.map((company) => (
+              {filteredCompanies.map((company) => (
                 <tr key={company.id} style={{
                   borderBottom: '1px solid #dee2e6',
                   transition: 'background-color 0.2s',
@@ -1495,6 +1342,7 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
         </div>
       )}
 
+      {/* Company Count Display */}
       <div style={{
         marginTop: '1rem',
         padding: '1rem',
@@ -1503,7 +1351,9 @@ const CompanyMaster: React.FC<CompanyMasterProps> = ({ resetKey }) => {
         fontSize: '0.9rem',
         color: '#6c757d'
       }}>
-        <strong>Total Companies:</strong> {companies.length}
+        <strong>
+          {searchQuery ? `Filtered: ${filteredCompanies.length} of ${companies.length}` : `Total Companies: ${companies.length}`}
+        </strong>
       </div>
     </div>
   );
