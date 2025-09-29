@@ -67,12 +67,6 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     return '';
   };
 
-  const validateShortName = (name: string): string => {
-    if (name.trim().length > 50) {
-      return 'Short Name must be less than 50 characters';
-    }
-    return '';
-  };
 
   const validateRegisteredAddress = (address: string): string => {
     if (address.trim().length > 500) {
@@ -103,25 +97,6 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     }
   };
 
-  const handleShortNameChange = (value: string) => {
-    setLocalFormData(prev => ({ ...prev, shortName: value }));
-
-    // Clear validation error when user starts typing
-    if (validationErrors.shortName) {
-      setValidationErrors(prev => ({ ...prev, shortName: '' }));
-    }
-
-    // Notify parent component of changes
-    const updatedData = { ...localFormData, shortName: value };
-    onDataChange(updatedData);
-  };
-
-  const handleShortNameBlur = () => {
-    const error = validateShortName(localFormData.shortName);
-    if (error) {
-      setValidationErrors(prev => ({ ...prev, shortName: error }));
-    }
-  };
 
   const handleRegisteredAddressChange = (value: string) => {
     setLocalFormData(prev => ({ ...prev, registeredAddress: value }));
@@ -231,25 +206,27 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                   fontWeight: '400',
                   color: '#6c757d',
                   fontSize: '12px',
-                  marginLeft: '8px'
+                  marginLeft: '8px',
+                  fontStyle: 'italic'
                 }}>
                   (Display only - saving will be enabled when backend is updated)
                 </span>
               </label>
               <input
                 type="text"
-                value={localFormData.shortName}
-                onChange={(e) => handleShortNameChange(e.target.value)}
-                onBlur={handleShortNameBlur}
+                value={localFormData.shortName || 'N/A'}
+                disabled
                 placeholder="Enter short name"
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.shortName ? '2px solid #dc3545' : '1px solid #dee2e6',
+                  border: '1px solid #dee2e6',
                   borderRadius: '6px',
                   fontSize: '14px',
                   fontFamily: 'inherit',
-                  backgroundColor: 'white',
+                  backgroundColor: '#f8f9fa',
+                  color: '#6c757d',
+                  cursor: 'not-allowed',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
                 }}
