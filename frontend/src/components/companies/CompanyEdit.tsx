@@ -131,11 +131,11 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
       setError(null);
 
       // Get company tab data
-      const companyTabData = formData.company as { companyName?: string; companyCode?: string; shortName?: string; registeredAddress?: string } | undefined;
+      const companyTabData = formData.company as { companyName?: string; companyCode?: string; shortName?: string; registeredAddress?: string; countryId?: number } | undefined;
 
       // Prepare update data (Company Code is readonly, so don't include it)
       // shortName temporarily excluded until backend schema is updated
-      const updateData: { companyName?: string; registeredAddress?: string } = {};
+      const updateData: { companyName?: string; registeredAddress?: string; countryId?: number } = {};
       let hasChanges = false;
 
       // Validate and prepare company name
@@ -169,6 +169,12 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
           return;
         }
         updateData.registeredAddress = companyTabData.registeredAddress.trim();
+        hasChanges = true;
+      }
+
+      // Include countryId if provided
+      if (companyTabData?.countryId !== undefined) {
+        updateData.countryId = companyTabData.countryId;
         hasChanges = true;
       }
 

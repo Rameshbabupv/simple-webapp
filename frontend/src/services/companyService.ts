@@ -38,6 +38,7 @@ export interface UpdateCompanyInput {
   registrationNumber?: string;
   primaryEmail?: string;
   registeredAddress?: string;
+  countryId?: number;
 }
 
 // CRUD operation response types
