@@ -31,7 +31,6 @@ export interface CreateCompanyInput {
 export interface UpdateCompanyInput {
   companyName?: string;
   registrationNumber?: string;
-  countryId?: number;
 }
 
 // CRUD operation response types
@@ -71,6 +70,15 @@ export interface CountryListResponse {
 
 export interface DynamicCountryResponse {
   [queryName: string]: Country[];
+}
+
+// Raw country data from GraphQL (with backend field names)
+interface RawCountryData {
+  id: number;
+  countryName?: string;
+  countryCode?: string;
+  name?: string;
+  code?: string;
 }
 
 export class CompanyService {
@@ -257,7 +265,7 @@ export class CompanyService {
   async getAllCountries(): Promise<Country[]> {
     // First check if we have a working query discovered by the frontend introspection
     const workingQuery = window?.workingCountriesQuery;
-    const workingFields = window?.workingCountriesFields || ['id', 'name', 'code'];
+    const workingFields = window?.workingCountriesFields || ['id', 'countryName', 'countryCode'];
 
     if (workingQuery) {
       try {
@@ -275,27 +283,37 @@ export class CompanyService {
         const countries = response[workingQuery];
         if (countries && Array.isArray(countries)) {
           console.log(`✅ Successfully loaded ${countries.length} countries using discovered query: ${workingQuery}`);
-          return countries;
+          // Map to expected interface if needed
+          return countries.map((country: RawCountryData) => ({
+            id: country.id,
+            name: country.countryName || country.name || '',
+            code: country.countryCode || country.code
+          }));
         }
       } catch (error) {
         console.warn(`Discovered query ${workingQuery} failed, falling back to standard queries:`, error);
       }
     }
 
-    // Try the standard 'countries' query
+    // Try the standard 'countries' query with correct field names
     try {
       const query = `
         query GetAllCountries {
           countries {
             id
-            name
-            code
+            countryName
+            countryCode
           }
         }
       `;
 
       const response = await this.makeGraphQLRequest<CountryListResponse>(query);
-      return response.countries;
+      // Map to expected interface
+      return response.countries.map((country: RawCountryData) => ({
+        id: country.id,
+        name: country.countryName || '',
+        code: country.countryCode
+      }));
     } catch (error) {
       console.warn('Standard countries query failed, trying alternative queries:', error);
     }
@@ -316,8 +334,8 @@ export class CompanyService {
           query ${queryName} {
             ${queryName} {
               id
-              name
-              code
+              countryName
+              countryCode
             }
           }
         `;
@@ -329,9 +347,14 @@ export class CompanyService {
 
           // Store this working query for future use
           window.workingCountriesQuery = queryName;
-          window.workingCountriesFields = ['id', 'name', 'code'];
+          window.workingCountriesFields = ['id', 'countryName', 'countryCode'];
 
-          return countries;
+          // Map to expected interface
+          return countries.map((country: RawCountryData) => ({
+            id: country.id,
+            name: country.countryName || '',
+            code: country.countryCode
+          }));
         }
       } catch (error) {
         console.warn(`Query ${queryName} failed:`, error);

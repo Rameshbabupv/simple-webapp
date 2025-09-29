@@ -291,8 +291,7 @@ const CompanyMaster: React.FC = () => {
       // Prepare data for submission (trim values)
       const dataToSubmit: UpdateCompanyInput = {
         companyName: editFormData.companyName?.trim(),
-        registrationNumber: editFormData.registrationNumber?.trim() || undefined,
-        countryId: editFormData.countryId
+        registrationNumber: editFormData.registrationNumber?.trim() || undefined
       };
 
       const updatedCompany = await companyService.updateCompany(selectedCompany.id, dataToSubmit);
