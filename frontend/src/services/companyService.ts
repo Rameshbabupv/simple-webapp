@@ -38,7 +38,7 @@ export interface UpdateCompanyInput {
   registrationNumber?: string;
   primaryEmail?: string;
   registeredAddress?: string;
-  countryId?: number;
+  // countryId?: number; // TODO: Backend doesn't support country updates yet
 }
 
 // CRUD operation response types

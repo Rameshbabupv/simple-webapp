@@ -135,7 +135,8 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
 
       // Prepare update data (Company Code is readonly, so don't include it)
       // shortName temporarily excluded until backend schema is updated
-      const updateData: { companyName?: string; registeredAddress?: string; countryId?: number } = {};
+      // countryId temporarily excluded - backend doesn't support country updates yet
+      const updateData: { companyName?: string; registeredAddress?: string } = {};
       let hasChanges = false;
 
       // Validate and prepare company name
@@ -172,11 +173,11 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
         hasChanges = true;
       }
 
-      // Include countryId if provided
-      if (companyTabData?.countryId !== undefined) {
-        updateData.countryId = companyTabData.countryId;
-        hasChanges = true;
-      }
+      // TODO: Include countryId when backend supports country updates
+      // if (companyTabData?.countryId !== undefined) {
+      //   updateData.countryId = companyTabData.countryId;
+      //   hasChanges = true;
+      // }
 
       if (hasChanges) {
         console.log('Saving company data:', updateData);
