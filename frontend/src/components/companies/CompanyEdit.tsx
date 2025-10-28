@@ -90,7 +90,8 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
         company: {
           companyName: company.companyName,
           // shortName: company.shortName, // temporarily disabled until backend schema is updated
-          registeredAddress: company.registeredAddress
+          registeredAddress: company.registeredAddress,
+          country: company.country
           // companyCode is readonly, so don't include in formData for saving
         },
         // Initialize other tab data as needed
@@ -131,11 +132,43 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
       setError(null);
 
       // Get company tab data
-      const companyTabData = formData.company as { companyName?: string; companyCode?: string; shortName?: string; registeredAddress?: string; countryId?: number } | undefined;
+      const companyTabData = formData.company as {
+        companyName?: string;
+        companyCode?: string;
+        shortName?: string;
+        registeredAddress?: string;
+        countryId?: number;
+        state?: string;
+        city?: string;
+        pincode?: string;
+        email?: string;
+        website?: string;
+        contactPerson?: string;
+        designation?: string;
+        landlineNo?: string;
+        officeMobile?: string;
+        currency?: string;
+        remarks?: string;
+      } | undefined;
 
       // Prepare update data (Company Code is readonly, so don't include it)
       // shortName temporarily excluded until backend schema is updated
-      const updateData: { companyName?: string; registeredAddress?: string; countryId?: number } = {};
+      const updateData: {
+        companyName?: string;
+        registeredAddress?: string;
+        countryId?: number;
+        state?: string;
+        city?: string;
+        pincode?: string;
+        email?: string;
+        website?: string;
+        contactPerson?: string;
+        designation?: string;
+        landlineNo?: string;
+        officeMobile?: string;
+        currency?: string;
+        remarks?: string;
+      } = {};
       let hasChanges = false;
 
       // Validate and prepare company name
@@ -177,6 +210,11 @@ const CompanyEdit: React.FC<CompanyEditProps> = () => {
         updateData.countryId = companyTabData.countryId;
         hasChanges = true;
       }
+
+      // TODO: Include new fields when backend supports them
+      // Backend needs to add these fields to UpdateCompanyInput GraphQL type first:
+      // state, city, pincode, email, website, contactPerson, designation,
+      // landlineNo, officeMobile, currency, remarks
 
       if (hasChanges) {
         console.log('Saving company data:', updateData);

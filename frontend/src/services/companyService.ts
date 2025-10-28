@@ -39,6 +39,9 @@ export interface UpdateCompanyInput {
   primaryEmail?: string;
   registeredAddress?: string;
   countryId?: number; // Backend now supports country updates (v1.1)
+  // TODO: Add these fields when backend implements them in UpdateCompanyInput GraphQL type:
+  // state, city, pincode, email, website, contactPerson, designation,
+  // landlineNo, officeMobile, currency, remarks
 }
 
 // CRUD operation response types

@@ -15,6 +15,17 @@ interface CompanyFormData {
   registeredAddress: string;
   country: string;
   countryId?: number;
+  state: string;
+  city: string;
+  pincode: string;
+  email: string;
+  website: string;
+  contactPerson: string;
+  designation: string;
+  landlineNo: string;
+  officeMobile: string;
+  currency: string;
+  remarks: string;
 }
 
 const CompanyTab: React.FC<CompanyTabProps> = ({
@@ -29,7 +40,18 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     shortName: '',
     registeredAddress: '',
     country: '',
-    countryId: undefined
+    countryId: undefined,
+    state: '',
+    city: '',
+    pincode: '',
+    email: '',
+    website: '',
+    contactPerson: '',
+    designation: '',
+    landlineNo: '',
+    officeMobile: '',
+    currency: '',
+    remarks: ''
   });
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [countries, setCountries] = useState<Country[]>([]);
@@ -60,7 +82,18 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
         shortName: company.shortName || '',
         registeredAddress: company.registeredAddress || '',
         country: company.country || '',
-        countryId: undefined
+        countryId: undefined,
+        state: '',
+        city: '',
+        pincode: '',
+        email: '',
+        website: '',
+        contactPerson: '',
+        designation: '',
+        landlineNo: '',
+        officeMobile: '',
+        currency: '',
+        remarks: ''
       });
     }
   }, [company, isNewCompany]);
@@ -75,7 +108,18 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
         shortName: existingData.shortName || '',
         registeredAddress: existingData.registeredAddress || '',
         country: existingData.country || '',
-        countryId: existingData.countryId
+        countryId: existingData.countryId,
+        state: existingData.state || '',
+        city: existingData.city || '',
+        pincode: existingData.pincode || '',
+        email: existingData.email || '',
+        website: existingData.website || '',
+        contactPerson: existingData.contactPerson || '',
+        designation: existingData.designation || '',
+        landlineNo: existingData.landlineNo || '',
+        officeMobile: existingData.officeMobile || '',
+        currency: existingData.currency || '',
+        remarks: existingData.remarks || ''
       });
     }
   }, [formData, isNewCompany]);
@@ -103,7 +147,8 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
 
 
   const handleCompanyNameChange = (value: string) => {
-    setLocalFormData(prev => ({ ...prev, companyName: value }));
+    const newFormData = { ...localFormData, companyName: value };
+    setLocalFormData(newFormData);
 
     // Clear validation error when user starts typing
     if (validationErrors.companyName) {
@@ -111,8 +156,7 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     }
 
     // Notify parent component of changes
-    const updatedData = { ...localFormData, companyName: value };
-    onDataChange(updatedData);
+    onDataChange(newFormData);
   };
 
 
@@ -125,7 +169,8 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
 
 
   const handleRegisteredAddressChange = (value: string) => {
-    setLocalFormData(prev => ({ ...prev, registeredAddress: value }));
+    const newFormData = { ...localFormData, registeredAddress: value };
+    setLocalFormData(newFormData);
 
     // Clear validation error when user starts typing
     if (validationErrors.registeredAddress) {
@@ -133,8 +178,7 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
     }
 
     // Notify parent component of changes
-    const updatedData = { ...localFormData, registeredAddress: value };
-    onDataChange(updatedData);
+    onDataChange(newFormData);
   };
 
   const handleRegisteredAddressBlur = () => {
@@ -146,19 +190,23 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
 
   const handleCountryChange = (value: string) => {
     const selectedCountry = countries.find(c => c.id.toString() === value);
-    setLocalFormData(prev => ({
-      ...prev,
-      countryId: selectedCountry ? selectedCountry.id : undefined,
-      country: selectedCountry ? selectedCountry.name : ''
-    }));
-
-    // Notify parent component of changes
-    const updatedData = {
+    const newFormData = {
       ...localFormData,
       countryId: selectedCountry ? selectedCountry.id : undefined,
       country: selectedCountry ? selectedCountry.name : ''
     };
-    onDataChange(updatedData);
+
+    setLocalFormData(newFormData);
+
+    // Notify parent component of changes with the new data
+    onDataChange(newFormData);
+  };
+
+  // Generic handler for simple text fields
+  const handleFieldChange = (fieldName: keyof CompanyFormData, value: string) => {
+    const newFormData = { ...localFormData, [fieldName]: value };
+    setLocalFormData(newFormData);
+    onDataChange(newFormData);
   };
 
 
@@ -331,6 +379,341 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
                 </div>
               )}
             </div>
+
+            {/* State Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                State *
+              </label>
+              <input
+                type="text"
+                value={localFormData.state}
+                onChange={(e) => handleFieldChange('state', e.target.value)}
+                placeholder="Enter state"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* City Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                City *
+              </label>
+              <input
+                type="text"
+                value={localFormData.city}
+                onChange={(e) => handleFieldChange('city', e.target.value)}
+                placeholder="Enter city"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Pincode Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Pincode *
+              </label>
+              <input
+                type="text"
+                value={localFormData.pincode}
+                onChange={(e) => handleFieldChange('pincode', e.target.value)}
+                placeholder="Enter pincode"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Email Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Email Id *
+              </label>
+              <input
+                type="email"
+                value={localFormData.email}
+                onChange={(e) => handleFieldChange('email', e.target.value)}
+                placeholder="Enter email"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Website Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Website
+              </label>
+              <input
+                type="url"
+                value={localFormData.website}
+                onChange={(e) => handleFieldChange('website', e.target.value)}
+                placeholder="Enter website URL"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Contact Person Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Contact Person *
+              </label>
+              <input
+                type="text"
+                value={localFormData.contactPerson}
+                onChange={(e) => handleFieldChange('contactPerson', e.target.value)}
+                placeholder="Enter contact person name"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* New Right Column for additional fields */}
+          <div>
+            {/* Designation Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Designation
+              </label>
+              <input
+                type="text"
+                value={localFormData.designation}
+                onChange={(e) => handleFieldChange('designation', e.target.value)}
+                placeholder="Enter designation"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Landline No Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Landline No
+              </label>
+              <input
+                type="tel"
+                value={localFormData.landlineNo}
+                onChange={(e) => handleFieldChange('landlineNo', e.target.value)}
+                placeholder="Enter landline number"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Office Mobile Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Office Mobile
+              </label>
+              <input
+                type="tel"
+                value={localFormData.officeMobile}
+                onChange={(e) => handleFieldChange('officeMobile', e.target.value)}
+                placeholder="Enter office mobile number"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Currency Field */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Currency
+              </label>
+              <input
+                type="text"
+                value={localFormData.currency}
+                onChange={(e) => handleFieldChange('currency', e.target.value)}
+                placeholder="Enter currency (e.g., USD, INR)"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Remarks Field - spans full width */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '8px',
+                fontWeight: '600',
+                color: '#495057',
+                fontSize: '14px'
+              }}>
+                Remarks
+              </label>
+              <textarea
+                value={localFormData.remarks}
+                onChange={(e) => handleFieldChange('remarks', e.target.value)}
+                placeholder="Enter remarks"
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box',
+                  resize: 'vertical',
+                  minHeight: '100px'
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -350,8 +733,9 @@ const CompanyTab: React.FC<CompanyTabProps> = ({
           }}>
             <span>ℹ️</span>
             <span>
-              Following STAGE approach: More company fields will be added incrementally.
-              Current fields: Company Name (required, 2-100 characters), Short Name (display only - backend update pending), Registered Address (optional, up to 500 characters), Country (optional - backend v1.1 supports updates). ID and Code shown as metadata.
+              <strong>⚠️ Note:</strong> Only <strong>Company Name</strong> and <strong>Registered Address</strong> can be saved currently.
+              The new fields (State, City, Pincode, Email, Website, Contact Person, Designation, Landline, Office Mobile, Currency, Remarks)
+              are <strong>not yet supported by the backend</strong> - they will not be saved until the backend team adds them to the UpdateCompanyInput GraphQL type.
             </span>
           </div>
         </div>
